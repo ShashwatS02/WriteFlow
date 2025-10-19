@@ -1,0 +1,29 @@
+/* Minimal global styles for development: Tailwind directives removed so
+   PostCSS does not require the Tailwind PostCSS plugin. Replace with
+   Tailwind once the PostCSS config and plugin are installed. */
+
+/* Re-enable Tailwind base/components/utilities. If PostCSS complains about
+   the plugin, ensure `@tailwindcss/postcss` & `tailwindcss` are installed
+   with compatible versions. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#__next {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #ffffff;
+  color: #0f172a; /* slate-900 */
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial;
+}

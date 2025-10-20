@@ -564,30 +564,3 @@ export default function PostDetail() {
     </div>
   );
 }
-
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  // For production, you'd fetch the post data here for server-side metadata generation
-  const title = `${params.slug.replace(/-/g, " ")} | WriteFlow`;
-  const description =
-    "Read this post on WriteFlow - a production-grade blogging platform.";
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: "article",
-      siteName: "WriteFlow",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-    },
-  };
-}

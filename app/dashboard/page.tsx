@@ -11,11 +11,28 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   CalendarDaysIcon,
+  FireIcon,
+  ChartBarIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
 import { trpc } from "../../lib/trpcClient";
 import { formatDate, formatRelativeTime, cn } from "../../lib/utils";
 import CategoryBadge from "../../components/CategoryBadge";
 import { CardSkeleton } from "../../components/SkeletonLoader";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "../../components/ui/Card";
+import { Button } from "../../components/ui/Button";
+import { Badge } from "../../components/ui/Badge";
+import {
+  StaggerContainer,
+  StaggerItem,
+  ScrollReveal,
+} from "../../components/animations";
 
 // Animation variants
 const fadeInUp = {
@@ -60,87 +77,129 @@ export default function DashboardPage() {
     : 0;
 
   return (
-    <div className="p-6">
+    <div className="p-8 max-w-[1800px] mx-auto space-y-8">
       {/* Header */}
       <motion.div
-        className="mb-8"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          Dashboard Overview
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Welcome back! Here's what's happening with your blog.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+              Dashboard Overview
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 flex items-center gap-2">
+              <SparklesIcon className="w-5 h-5" />
+              Welcome back! Here's what's happening with your blog.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              size="md"
+              onClick={() => (window.location.href = "/dashboard/posts")}
+              icon={<DocumentTextIcon className="w-5 h-5" />}
+            >
+              Posts
+            </Button>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => (window.location.href = "/dashboard/posts/new")}
+              icon={<PencilSquareIcon className="w-5 h-5" />}
+            >
+              New Post
+            </Button>
+          </div>
+        </div>
       </motion.div>
 
       {/* Statistics Cards */}
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
+      <StaggerContainer
+        staggerDelay={0.08}
+        delayChildren={0.2}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
       >
-        <StatCard
-          title="Total Posts"
-          value={stats?.totalPosts || 0}
-          icon={DocumentTextIcon}
-          color="blue"
-          trend={{ value: publishRate, isPositive: publishRate > 50 }}
-          loading={statsLoading}
-        />
-        <StatCard
-          title="Published"
-          value={publishedCount}
-          icon={EyeIcon}
-          color="green"
-          subtitle={`${publishRate}% of total`}
-          loading={statsLoading}
-        />
-        <StatCard
-          title="Draft Posts"
-          value={draftCount}
-          icon={PencilSquareIcon}
-          color="orange"
-          subtitle={draftCount > 0 ? "Ready to publish" : "All published!"}
-          loading={statsLoading}
-        />
-        <StatCard
-          title="Categories"
-          value={stats?.totalCategories || 0}
-          icon={TagIcon}
-          color="purple"
-          subtitle={`${stats?.totalReadingTime || 0} min read total`}
-          loading={statsLoading}
-        />
-      </motion.div>
+        <StaggerItem variant="scaleIn">
+          <EnhancedStatCard
+            title="Total Posts"
+            value={stats?.totalPosts || 0}
+            icon={DocumentTextIcon}
+            color="blue"
+            trend={{ value: publishRate, isPositive: publishRate > 50 }}
+            loading={statsLoading}
+            description="All time posts"
+          />
+        </StaggerItem>
+        <StaggerItem variant="scaleIn">
+          <EnhancedStatCard
+            title="Published"
+            value={publishedCount}
+            icon={EyeIcon}
+            color="green"
+            subtitle={`${publishRate}% of total`}
+            loading={statsLoading}
+            description="Live on your blog"
+            badge={{ text: "Live", variant: "success" }}
+          />
+        </StaggerItem>
+        <StaggerItem variant="scaleIn">
+          <EnhancedStatCard
+            title="Draft Posts"
+            value={draftCount}
+            icon={PencilSquareIcon}
+            color="orange"
+            subtitle={draftCount > 0 ? "Ready to publish" : "All published!"}
+            loading={statsLoading}
+            description="Work in progress"
+            badge={
+              draftCount > 0
+                ? { text: `${draftCount} pending`, variant: "warning" }
+                : undefined
+            }
+          />
+        </StaggerItem>
+        <StaggerItem variant="scaleIn">
+          <EnhancedStatCard
+            title="Categories"
+            value={stats?.totalCategories || 0}
+            icon={TagIcon}
+            color="purple"
+            subtitle={`${stats?.totalReadingTime || 0} min read total`}
+            loading={statsLoading}
+            description="Content organization"
+          />
+        </StaggerItem>
+      </StaggerContainer>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Posts Widget */}
-        <motion.div
+        <ScrollReveal
+          variant="fadeInLeft"
+          delay={0.3}
           className="lg:col-span-2"
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
         >
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+          <Card variant="elevated">
+            <CardHeader>
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Recent Posts
-                </h2>
-                <Link
-                  href="/dashboard/posts"
-                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500">
+                    <FireIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <CardTitle>Recent Posts</CardTitle>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => (window.location.href = "/dashboard/posts")}
                 >
-                  View all posts
-                </Link>
+                  View all
+                </Button>
               </div>
-            </div>
+            </CardHeader>
 
-            <div className="p-0">
+            <CardContent className="p-0">
               {postsLoading ? (
                 <div className="space-y-4 p-6">
                   {Array.from({ length: 3 }).map((_, i) => (
@@ -163,16 +222,13 @@ export default function DashboardPage() {
                             <h3 className="text-base font-medium text-gray-900 dark:text-white truncate">
                               {post.title}
                             </h3>
-                            <span
-                              className={cn(
-                                "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                                post.isPublished
-                                  ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                                  : "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200"
-                              )}
+                            <Badge
+                              variant={post.isPublished ? "success" : "warning"}
+                              size="sm"
+                              dot={post.isPublished}
                             >
                               {post.isPublished ? "Published" : "Draft"}
-                            </span>
+                            </Badge>
                           </div>
 
                           <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
@@ -211,20 +267,26 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="flex items-center gap-2 ml-4">
-                          <Link
-                            href={`/blog/${post.slug}`}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              window.open(`/blog/${post.slug}`, "_blank")
+                            }
+                            icon={<EyeIcon className="h-4 w-4" />}
                           >
-                            <EyeIcon className="h-4 w-4" />
                             View
-                          </Link>
-                          <Link
-                            href={`/dashboard/posts/${post.id}/edit`}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() =>
+                              (window.location.href = `/dashboard/posts/${post.id}`)
+                            }
+                            icon={<PencilSquareIcon className="h-4 w-4" />}
                           >
-                            <PencilSquareIcon className="h-4 w-4" />
                             Edit
-                          </Link>
+                          </Button>
                         </div>
                       </div>
                     </motion.div>
@@ -239,34 +301,35 @@ export default function DashboardPage() {
                   <p className="text-gray-600 dark:text-gray-300 mb-6">
                     Get started by creating your first blog post.
                   </p>
-                  <Link
-                    href="/dashboard/posts/new"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() =>
+                      (window.location.href = "/dashboard/posts/new")
+                    }
+                    icon={<PencilSquareIcon className="h-5 w-5" />}
                   >
-                    <PencilSquareIcon className="h-4 w-4" />
                     Create First Post
-                  </Link>
+                  </Button>
                 </div>
               )}
-            </div>
-          </div>
-        </motion.div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
 
         {/* Quick Actions & Categories */}
-        <motion.div
-          className="space-y-8"
-          variants={fadeInUp}
-          initial="initial"
-          animate="animate"
-        >
+        <ScrollReveal variant="fadeInRight" delay={0.4} className="space-y-8">
           {/* Quick Actions */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Quick Actions
-              </h2>
-            </div>
-            <div className="p-6 space-y-3">
+          <Card variant="elevated">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                  <SparklesIcon className="w-5 h-5 text-white" />
+                </div>
+                <CardTitle>Quick Actions</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
               <Link
                 href="/dashboard/posts/new"
                 className="flex items-center gap-3 w-full p-3 text-left rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors group"
@@ -300,25 +363,31 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </Link>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {/* Categories Overview */}
-          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-slate-700">
+          <Card variant="elevated">
+            <CardHeader>
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  Categories
-                </h2>
-                <Link
-                  href="/dashboard/categories"
-                  className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500">
+                    <TagIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <CardTitle>Categories</CardTitle>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() =>
+                    (window.location.href = "/dashboard/categories")
+                  }
                 >
                   Manage
-                </Link>
+                </Button>
               </div>
-            </div>
-            <div className="p-6">
+            </CardHeader>
+            <CardContent>
               {categories && categories.length > 0 ? (
                 <div className="space-y-3">
                   {categories
@@ -348,100 +417,131 @@ export default function DashboardPage() {
                   </p>
                 </div>
               )}
-            </div>
-          </div>
-        </motion.div>
+            </CardContent>
+          </Card>
+        </ScrollReveal>
       </div>
     </div>
   );
 }
 
-interface StatCardProps {
+interface EnhancedStatCardProps {
   title: string;
   value: number;
   icon: React.ComponentType<{ className?: string }>;
   color: "blue" | "green" | "orange" | "purple";
   subtitle?: string;
+  description?: string;
   trend?: {
     value: number;
     isPositive: boolean;
   };
+  badge?: {
+    text: string;
+    variant: "primary" | "success" | "warning" | "danger";
+  };
   loading?: boolean;
 }
 
-function StatCard({
+function EnhancedStatCard({
   title,
   value,
   icon: Icon,
   color,
   subtitle,
+  description,
   trend,
+  badge,
   loading,
-}: StatCardProps) {
+}: EnhancedStatCardProps) {
   const colorClasses = {
-    blue: "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400",
-    green:
-      "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400",
-    orange:
-      "bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400",
-    purple:
-      "bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400",
+    blue: "from-blue-600 to-indigo-600",
+    green: "from-green-600 to-emerald-600",
+    orange: "from-orange-600 to-amber-600",
+    purple: "from-purple-600 to-pink-600",
+  };
+
+  const iconBgClasses = {
+    blue: "bg-gradient-to-br from-blue-500 to-indigo-500",
+    green: "bg-gradient-to-br from-green-500 to-emerald-500",
+    orange: "bg-gradient-to-br from-orange-500 to-amber-500",
+    purple: "bg-gradient-to-br from-purple-500 to-pink-500",
   };
 
   if (loading) {
-    return <CardSkeleton className="h-32" />;
+    return <CardSkeleton className="h-40" />;
   }
 
   return (
     <motion.div
-      className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 p-6"
       variants={fadeInUp}
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <div className={cn("p-2 rounded-lg", colorClasses[color])}>
-              <Icon className="h-5 w-5" />
+      <Card variant="elevated" hover className="h-full">
+        <CardContent className="p-6">
+          <div className="flex items-start justify-between mb-4">
+            <div
+              className={cn("p-3 rounded-xl shadow-lg", iconBgClasses[color])}
+            >
+              <Icon className="h-6 w-6 text-white" />
             </div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-              {title}
-            </p>
+            {badge && (
+              <Badge variant={badge.variant} size="sm" dot>
+                {badge.text}
+              </Badge>
+            )}
           </div>
 
-          <motion.div
-            className="flex items-end gap-2"
-            variants={counterAnimation}
-          >
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">
-              {value.toLocaleString()}
-            </span>
-            {trend && (
-              <div
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {title}
+            </p>
+
+            <motion.div
+              className="flex items-end gap-3"
+              variants={counterAnimation}
+            >
+              <span
                 className={cn(
-                  "flex items-center gap-1 text-sm font-medium",
-                  trend.isPositive
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
+                  "text-4xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
+                  colorClasses[color]
                 )}
               >
-                {trend.isPositive ? (
-                  <ArrowUpIcon className="h-3 w-3" />
-                ) : (
-                  <ArrowDownIcon className="h-3 w-3" />
-                )}
-                {trend.value}%
-              </div>
-            )}
-          </motion.div>
+                {value.toLocaleString()}
+              </span>
+              {trend && (
+                <div
+                  className={cn(
+                    "flex items-center gap-1 text-sm font-semibold pb-1",
+                    trend.isPositive
+                      ? "text-green-600 dark:text-green-400"
+                      : "text-red-600 dark:text-red-400"
+                  )}
+                >
+                  {trend.isPositive ? (
+                    <ArrowUpIcon className="h-4 w-4" />
+                  ) : (
+                    <ArrowDownIcon className="h-4 w-4" />
+                  )}
+                  {trend.value}%
+                </div>
+              )}
+            </motion.div>
 
-          {subtitle && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              {subtitle}
-            </p>
-          )}
-        </div>
-      </div>
+            {subtitle && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                {subtitle}
+              </p>
+            )}
+
+            {description && (
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                {description}
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }

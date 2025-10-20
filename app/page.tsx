@@ -148,7 +148,7 @@ export default function Home() {
               </Link>
 
               <Link
-                href="/admin"
+                href="/dashboard"
                 className="inline-flex items-center justify-center rounded-lg bg-white dark:bg-slate-800 px-6 py-3 text-base font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-slate-600 hover:bg-gray-50 dark:hover:bg-slate-700 transition-all duration-200 hover:scale-105"
               >
                 <PencilIcon className="mr-2 h-4 w-4" />

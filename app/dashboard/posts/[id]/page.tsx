@@ -1,43 +1,71 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useCreatePost, useCategories } from "../../../../lib/hooks/usePosts";
+import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  usePostById,
+  useUpdatePost,
+  useCategories,
+} from "../../../../lib/hooks/usePosts";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeHighlight from "rehype-highlight";
 import { uploadFile } from "../../../../lib/upload";
 import { mockUpload } from "../../../../lib/uploadMock";
-import SearchInput from "../../../../components/SearchInput";
 import trpc from "../../../../lib/trpcClient";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { slugify } from "../../../../lib/utils";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "../../../../components/ui/Card";
+import { Card, CardContent } from "../../../../components/ui/Card";
 import { Button } from "../../../../components/ui/Button";
 import { Badge } from "../../../../components/ui/Badge";
 import { Input } from "../../../../components/ui/Input";
+import { Skeleton } from "../../../../components/ui/Skeleton";
 
-export default function NewPostPage() {
+export default function EditPostPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
+  const [postId, setPostId] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    params.then((p) => setPostId(parseInt(p.id, 10)));
+  }, [params]);
+  const { data: post, isLoading } = usePostById(postId);
+  const update = useUpdatePost();
+  const categories = useCategories();
+
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
-  const [autoSlug, setAutoSlug] = useState(true); // Auto-generate slug from title
+  const [autoSlug, setAutoSlug] = useState(false);
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [cover, setCover] = useState<string | null>(null);
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
-  const categories = useCategories();
-  const create = useCreatePost();
   const [slugTaken, setSlugTaken] = useState(false);
   const [checkingSlug, setCheckingSlug] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const savingRef = useRef(false);
+  const [isPublished, setIsPublished] = useState(false);
+
+  // Initialize form with post data
+  useEffect(() => {
+    if (post) {
+      setTitle(post.title || "");
+      setSlug(post.slug || "");
+      setExcerpt(post.excerpt || "");
+      setContent(post.content || "");
+      setCover(post.coverImageUrl || null);
+      setIsPublished(post.isPublished || false);
+
+      // Extract category slugs
+      const catSlugs =
+        (post as any).categories
+          ?.map((c: any) => c.categories?.slug || c.slug)
+          .filter(Boolean) || [];
+      setSelectedCats(catSlugs);
+    }
+  }, [post]);
 
   // Auto-generate slug from title when enabled
   useEffect(() => {
@@ -46,41 +74,7 @@ export default function NewPostPage() {
     }
   }, [title, autoSlug]);
 
-  const insertInlineImage = async (file: File) => {
-    setUploading(true);
-    try {
-      const res = await uploadFile(file);
-      const url = res.url || (await mockUpload(file));
-      setContent((c) => c + `\n\n![](${url})\n`);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  // Debounced autosave (draft)
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (!title && !content) return;
-      savingRef.current = true;
-      create.mutate(
-        {
-          title,
-          slug,
-          content,
-          excerpt,
-          coverImageUrl: cover || undefined,
-          categories: selectedCats,
-        },
-        {
-          onSuccess: () => setLastSaved(new Date()),
-          onSettled: () => (savingRef.current = false),
-        }
-      );
-    }, 10000);
-    return () => clearTimeout(t);
-  }, [title, slug, content, excerpt, cover, selectedCats, create]);
-
-  // Slug uniqueness check
+  // Slug uniqueness check (exclude current post)
   useEffect(() => {
     if (!slug) {
       setSlugTaken(false);
@@ -90,7 +84,10 @@ export default function NewPostPage() {
     setCheckingSlug(true);
     const t = setTimeout(async () => {
       try {
-        const res = await trpc.posts.checkSlug.query({ slug });
+        const res = await trpc.posts.checkSlug.query({
+          slug,
+          excludeId: postId,
+        });
         setSlugTaken(res.exists);
       } catch {
         setSlugTaken(false);
@@ -99,21 +96,23 @@ export default function NewPostPage() {
       }
     }, 400);
     return () => clearTimeout(t);
-  }, [slug]);
+  }, [slug, postId]);
 
-  // beforeunload warning
-  useEffect(() => {
-    const handler = (e: BeforeUnloadEvent) => {
-      if (savingRef.current || content || title) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    };
-    window.addEventListener("beforeunload", handler);
-    return () => window.removeEventListener("beforeunload", handler);
-  }, [content, title]);
+  const insertInlineImage = async (file: File) => {
+    setUploading(true);
+    try {
+      const res = await uploadFile(file);
+      const url = res.url || (await mockUpload(file));
+      setContent((c) => c + `\n\n![](${url})\n`);
+      toast.success("Image inserted!");
+    } catch {
+      toast.error("Failed to upload image");
+    } finally {
+      setUploading(false);
+    }
+  };
 
-  const handleSave = async (isPublished: boolean) => {
+  const handleUpdate = async (publish?: boolean) => {
     if (!title.trim()) {
       toast.error("Title is required");
       return;
@@ -127,124 +126,156 @@ export default function NewPostPage() {
       return;
     }
 
-    const toastId = toast.loading(
-      isPublished ? "Publishing post..." : "Saving draft..."
-    );
+    const newPublishStatus =
+      typeof publish === "boolean" ? publish : isPublished;
+    const toastId = toast.loading("Updating post...");
 
-    create.mutate(
+    update.mutate(
       {
+        id: postId,
         title: title.trim(),
         slug: slug.trim() || undefined,
         content: content.trim(),
         excerpt: excerpt.trim() || undefined,
         coverImageUrl: cover || undefined,
         categories: selectedCats,
-        isPublished,
+        isPublished: newPublishStatus,
       },
       {
-        onSuccess: (data) => {
-          toast.success(
-            isPublished
-              ? "Post published successfully!"
-              : "Draft saved successfully!",
-            { id: toastId }
-          );
-          // Navigate to posts list
-          router.push("/dashboard/posts");
+        onSuccess: () => {
+          toast.success("Post updated successfully!", { id: toastId });
+          setIsPublished(newPublishStatus);
         },
         onError: (error: any) => {
-          toast.error(error?.message || "Failed to save post", { id: toastId });
+          toast.error(error?.message || "Failed to update post", {
+            id: toastId,
+          });
         },
       }
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="text-center">
+          <svg
+            className="animate-spin h-8 w-8 mx-auto mb-4 text-blue-600"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <p className="text-gray-600 dark:text-gray-400">Loading post...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2 dark:text-white">
+            Post not found
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            The post you're looking for doesn't exist.
+          </p>
+          <button
+            onClick={() => router.push("/dashboard/posts")}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Back to Posts
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="h-[calc(100vh-60px)] p-6 space-y-4">
-      {/* Header with actions */}
-      <Card variant="glass" className="backdrop-blur-sm">
-        <div className="p-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Create New Post
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Write and publish your blog post
-            </p>
+    <div className="h-[calc(100vh-60px)] p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => router.push("/dashboard/posts")}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
+              ← Back
+            </button>
           </div>
-          <div className="flex items-center gap-3">
-            {lastSaved && (
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                Saved {lastSaved.toLocaleTimeString()}
-              </span>
-            )}
-            <Button
-              variant="secondary"
-              size="md"
-              onClick={() => handleSave(false)}
+          <h1 className="text-xl font-bold dark:text-white mt-1">Edit Post</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Post ID: {postId} • Status: {isPublished ? "Published" : "Draft"}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            className="px-3 py-2 rounded border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={() => handleUpdate()}
+            disabled={
+              slugTaken || checkingSlug || !title.trim() || !content.trim()
+            }
+          >
+            Save Changes
+          </button>
+          {isPublished ? (
+            <button
+              className="px-3 py-2 rounded bg-yellow-600 text-white hover:bg-yellow-700 disabled:opacity-50 transition-colors"
+              onClick={() => handleUpdate(false)}
               disabled={
                 slugTaken || checkingSlug || !title.trim() || !content.trim()
-              }
-              loading={create.isPending}
-              icon={
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"
-                  />
-                </svg>
               }
             >
-              Save Draft
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => handleSave(true)}
+              Unpublish
+            </button>
+          ) : (
+            <button
+              className={`px-3 py-2 rounded transition-colors ${
+                slugTaken || checkingSlug || !title.trim() || !content.trim()
+                  ? "bg-slate-300 text-slate-600 dark:bg-slate-700 dark:text-slate-400 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
+              onClick={() => handleUpdate(true)}
               disabled={
                 slugTaken || checkingSlug || !title.trim() || !content.trim()
-              }
-              loading={create.isPending}
-              icon={
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
               }
             >
               Publish
-            </Button>
-          </div>
+            </button>
+          )}
         </div>
-      </Card>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[calc(100%-5rem)]">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[calc(100%-60px)]">
         {/* Editor side */}
-        <Card variant="elevated" className="flex flex-col overflow-hidden">
-          <CardContent className="p-4 border-b border-gray-200 dark:border-gray-700 grid grid-cols-1 gap-4">
-            <Input
-              label="Title"
-              placeholder="Enter post title..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
+        <div className="flex flex-col border dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800">
+          <div className="p-3 border-b dark:border-gray-700 grid grid-cols-1 gap-3">
+            <div>
+              <label className="block text-sm font-medium mb-1 dark:text-gray-200">
+                Title <span className="text-red-500">*</span>
+              </label>
+              <input
+                className="w-full border dark:border-gray-600 rounded px-3 py-2 dark:bg-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Enter post title..."
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-sm font-medium dark:text-gray-200">
@@ -321,7 +352,6 @@ export default function NewPostPage() {
                 onChange={(e) => setExcerpt(e.target.value)}
               />
             </div>
-            {/* Categories */}
             <div>
               <label className="block text-sm font-medium mb-2 dark:text-gray-200">
                 Categories
@@ -330,10 +360,14 @@ export default function NewPostPage() {
                 {categories.data?.map((c: any) => {
                   const selected = selectedCats.includes(c.slug);
                   return (
-                    <Badge
+                    <button
                       key={c.id}
-                      variant={selected ? "primary" : "outline"}
-                      size="md"
+                      type="button"
+                      className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                        selected
+                          ? "bg-blue-600 text-white border-blue-600"
+                          : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-gray-200"
+                      }`}
                       onClick={() =>
                         setSelectedCats((prev) =>
                           selected
@@ -341,16 +375,13 @@ export default function NewPostPage() {
                             : [...prev, c.slug]
                         )
                       }
-                      className="cursor-pointer hover:scale-105 transition-transform"
-                      dot={selected}
                     >
                       {c.name}
-                    </Badge>
+                    </button>
                   );
                 })}
               </div>
             </div>
-            {/* Cover */}
             <div>
               <label className="block text-sm font-medium mb-2 dark:text-gray-200">
                 Cover Image
@@ -403,23 +434,11 @@ export default function NewPostPage() {
                 )}
               </div>
             </div>
-          </CardContent>
+          </div>
           <div className="relative flex-1 flex flex-col">
             <textarea
               className="flex-1 p-4 outline-none dark:bg-slate-900 dark:text-white focus:ring-2 focus:ring-inset focus:ring-blue-500 font-mono text-sm resize-none"
-              placeholder="Write your content in Markdown...
-
-## Heading 2
-### Heading 3
-
-**Bold text** and *italic text*
-
-- Bullet point
-- Another point
-
-\`\`\`code block\`\`\`
-
-[Link](https://example.com)"
+              placeholder="Write your content in Markdown..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
               onDrop={async (e) => {
@@ -468,10 +487,10 @@ export default function NewPostPage() {
               read
             </span>
           </div>
-        </Card>
+        </div>
 
         {/* Preview side */}
-        <Card variant="elevated" className="flex flex-col overflow-hidden">
+        <div className="border dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-slate-800 flex flex-col">
           <div className="p-3 border-b dark:border-gray-700 font-semibold dark:text-white flex items-center justify-between">
             <span>Live Preview</span>
             <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
@@ -486,7 +505,7 @@ export default function NewPostPage() {
               {content || "Start writing to see the preview..."}
             </ReactMarkdown>
           </div>
-        </Card>
+        </div>
       </div>
     </div>
   );

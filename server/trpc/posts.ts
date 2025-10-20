@@ -9,20 +9,24 @@ import { eq, and, sql, desc, asc, inArray } from "drizzle-orm";
 export const postsRouter = router({
   getAll: publicProcedure
     .input(
-      z.object({
-        // accept both UI and server naming
-        published: z.boolean().optional(),
-        isPublished: z.boolean().optional(),
-        category: z.string().optional(),
-        categories: z.array(z.string()).optional(),
-        categoryIds: z.array(z.number().int()).optional(),
-        search: z.string().optional(),
-        page: z.number().int().min(1).optional(),
-        pageSize: z.number().int().min(1).max(100).optional(),
-        // accept either 'sort' or 'sortBy' for compatibility with different clients
-        sort: z.enum(["newest", "oldest", "reading", "title"]).optional(),
-        sortBy: z.enum(["newest", "oldest", "title", "readingTime"]).optional(),
-      })
+      z
+        .object({
+          // accept both UI and server naming
+          published: z.boolean().optional(),
+          isPublished: z.boolean().optional(),
+          category: z.string().optional(),
+          categories: z.array(z.string()).optional(),
+          categoryIds: z.array(z.number().int()).optional(),
+          search: z.string().optional(),
+          page: z.number().int().min(1).optional(),
+          pageSize: z.number().int().min(1).max(100).optional(),
+          // accept either 'sort' or 'sortBy' for compatibility with different clients
+          sort: z.enum(["newest", "oldest", "reading", "title"]).optional(),
+          sortBy: z
+            .enum(["newest", "oldest", "title", "readingTime"])
+            .optional(),
+        })
+        .optional()
     )
     .query(async ({ input, ctx }) => {
       if (!ctx.db)
@@ -31,8 +35,9 @@ export const postsRouter = router({
           message: "Database not configured",
         });
 
-      const page = input.page || 1;
-      const pageSize = input.pageSize || 10;
+      const inp = input || {};
+      const page = inp.page || 1;
+      const pageSize = inp.pageSize || 10;
       const offset = (page - 1) * pageSize;
 
       // Base query
@@ -42,10 +47,10 @@ export const postsRouter = router({
       let countQ: any = ctx.db.select().from(posts);
 
       const publishedFlag =
-        typeof input.isPublished === "boolean"
-          ? input.isPublished
-          : typeof input.published === "boolean"
-            ? input.published
+        typeof inp.isPublished === "boolean"
+          ? inp.isPublished
+          : typeof inp.published === "boolean"
+            ? inp.published
             : undefined;
       if (typeof publishedFlag === "boolean") {
         q = q.where(eq(posts.isPublished, publishedFlag));
@@ -53,13 +58,13 @@ export const postsRouter = router({
       }
 
       const catSlugs =
-        input.categories && input.categories.length
-          ? input.categories
-          : input.category
-            ? [input.category]
+        inp.categories && inp.categories.length
+          ? inp.categories
+          : inp.category
+            ? [inp.category]
             : [];
       const catIds =
-        input.categoryIds && input.categoryIds.length ? input.categoryIds : [];
+        inp.categoryIds && inp.categoryIds.length ? inp.categoryIds : [];
       if (catIds.length || catSlugs.length) {
         q = q
           .innerJoin(postCategories, eq(postCategories.postId, posts.id))
@@ -82,8 +87,8 @@ export const postsRouter = router({
           .groupBy(posts.id);
       }
 
-      if (input.search) {
-        const term = `%${input.search}%`;
+      if (inp.search) {
+        const term = `%${inp.search}%`;
         const cond = sql`(posts.title ILIKE ${term} OR posts.excerpt ILIKE ${term} OR posts.content ILIKE ${term})`;
         q = q.where(cond);
         countQ = countQ.where(cond);
@@ -91,7 +96,7 @@ export const postsRouter = router({
 
       // Sorting
       // pick sort value from either field and normalize to our internal keys
-      const rawSort = input.sort || input.sortBy || "newest";
+      const rawSort = inp.sort || inp.sortBy || "newest";
       if (rawSort === "newest") q = q.orderBy(desc(posts.createdAt));
       if (rawSort === "oldest") q = q.orderBy(asc(posts.createdAt));
       if (rawSort === "reading" || rawSort === "readingTime")

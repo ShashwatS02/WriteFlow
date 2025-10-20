@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
@@ -47,7 +47,7 @@ const PAGE_SIZE_OPTIONS = [6, 12, 18, 24];
 // Layout view types
 type ViewType = "grid" | "list";
 
-export default function BlogPage() {
+function BlogPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -552,6 +552,20 @@ export default function BlogPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+          <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+        </div>
+      }
+    >
+      <BlogPageContent />
+    </Suspense>
   );
 }
 

@@ -1,8 +1,4 @@
 "use client";
-
-// Disable static generation to avoid webpack bundling issues
-export const dynamic = "force-dynamic";
-
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import {
   BookOpen,
@@ -149,35 +145,34 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black relative overflow-hidden">
-      {/* Ultra-Premium Gradient Mesh Background */}
+    <div className="min-h-screen bg-white dark:bg-slate-950 relative overflow-hidden">
+      {/* Ultra-Premium Gradient Mesh Background (Vercel-style) */}
       <div className="fixed inset-0 -z-10">
-        {/* Base gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
-
-        {/* Mouse-tracking gradient with more intensity */}
+        {/* Gradient mesh base */}
         <div
-          className="absolute inset-0 opacity-60 transition-all duration-300"
+          className="absolute inset-0"
           style={{
             background: `
-              radial-gradient(circle 1000px at ${mousePosition.x}px ${mousePosition.y}px, rgba(99, 102, 241, 0.15), transparent 50%),
-              radial-gradient(circle 800px at ${mousePosition.x * 0.8}px ${mousePosition.y * 1.2}px, rgba(168, 85, 247, 0.12), transparent 50%)
+              radial-gradient(circle 800px at ${mousePosition.x}px ${mousePosition.y}px, rgba(99, 102, 241, 0.08), transparent 50%),
+              radial-gradient(circle at 20% 50%, rgba(168, 85, 247, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.03) 0%, transparent 50%)
             `,
           }}
         />
 
-        {/* Vibrant animated gradient orbs */}
+        {/* Animated gradient orbs */}
         <motion.div
-          className="absolute top-0 left-1/4 w-[800px] h-[800px] rounded-full blur-3xl"
+          className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full opacity-30 blur-3xl"
           style={{
             background:
-              "radial-gradient(circle, rgba(99, 102, 241, 0.6) 0%, rgba(139, 92, 246, 0.4) 30%, transparent 70%)",
+              "radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, transparent 70%)",
           }}
           animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.4, 0.7, 0.4],
-            x: [0, 100, 0],
-            y: [0, -50, 0],
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+            x: [0, 50, 0],
+            y: [0, -30, 0],
           }}
           transition={{
             duration: 20,
@@ -187,16 +182,16 @@ export default function Home() {
         />
 
         <motion.div
-          className="absolute top-1/3 right-1/4 w-[700px] h-[700px] rounded-full blur-3xl"
+          className="absolute top-1/4 right-1/4 w-[500px] h-[500px] rounded-full opacity-30 blur-3xl"
           style={{
             background:
-              "radial-gradient(circle, rgba(168, 85, 247, 0.6) 0%, rgba(236, 72, 153, 0.4) 30%, transparent 70%)",
+              "radial-gradient(circle, rgba(168, 85, 247, 0.4) 0%, transparent 70%)",
           }}
           animate={{
-            scale: [1.3, 1, 1.3],
-            opacity: [0.6, 0.4, 0.6],
-            x: [0, -100, 0],
-            y: [0, 60, 0],
+            scale: [1.2, 1, 1.2],
+            opacity: [0.5, 0.3, 0.5],
+            x: [0, -50, 0],
+            y: [0, 30, 0],
           }}
           transition={{
             duration: 20,
@@ -252,113 +247,91 @@ export default function Home() {
               </div>
             </motion.div>
 
-            {/* Hero heading with ultra-premium gradient - MASSIVE & DRAMATIC */}
+            {/* Hero heading with ultra-premium gradient */}
             <motion.h1
-              className="text-7xl font-black tracking-tight sm:text-8xl lg:text-9xl xl:text-[12rem] mb-12 leading-[0.9]"
+              className="text-6xl font-bold tracking-tight sm:text-7xl lg:text-8xl xl:text-9xl mb-8"
               variants={fadeInUp}
             >
-              <span className="block text-white mb-6 drop-shadow-2xl">
+              <span className="block text-slate-900 dark:text-white mb-3 font-extrabold">
                 Effortless
               </span>
-              <span className="block bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent drop-shadow-2xl animate-gradient-x">
+              <span className="block gradient-text-animated text-[1.1em] leading-[0.9] font-black">
                 Content Creation
               </span>
             </motion.h1>
 
-            {/* Enhanced description with better contrast */}
+            {/* Enhanced description with better typography */}
             <motion.p
-              className="mt-10 max-w-3xl mx-auto text-2xl sm:text-3xl leading-relaxed text-slate-300 font-medium"
+              className="mt-8 max-w-3xl mx-auto text-xl sm:text-2xl leading-relaxed text-slate-600 dark:text-slate-300 font-medium"
               variants={fadeInUp}
             >
               A production-grade blogging platform for creators who demand{" "}
-              <span className="text-white font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              <span className="text-slate-900 dark:text-white font-semibold">
                 simplicity
               </span>
               ,{" "}
-              <span className="text-white font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              <span className="text-slate-900 dark:text-white font-semibold">
                 performance
               </span>
               , and{" "}
-              <span className="text-white font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+              <span className="text-slate-900 dark:text-white font-semibold">
                 beautiful design
               </span>
               .
             </motion.p>
 
-            {/* CTA buttons with magnetic effect - BIGGER & BOLDER */}
+            {/* CTA buttons with magnetic effect */}
             <motion.div
-              className="mt-16 flex flex-col sm:flex-row gap-6 justify-center items-center"
+              className="mt-12 flex flex-col sm:flex-row gap-4 justify-center items-center"
               variants={fadeInUp}
             >
               <MagneticButton href="/blog">
-                <button className="group relative px-12 py-6 text-xl font-bold text-white rounded-2xl overflow-hidden transition-all duration-300 hover:scale-105">
-                  {/* Animated gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 animate-gradient-x" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 blur-2xl opacity-50 group-hover:opacity-75 transition-opacity bg-gradient-to-r from-blue-600 to-purple-600" />
-
-                  {/* Content */}
-                  <span className="relative flex items-center gap-3">
-                    <Sparkles className="h-6 w-6" />
-                    <span>Explore Blog</span>
-                    <motion.div
-                      animate={{ x: [0, 4, 0] }}
-                      transition={{
-                        duration: 1.5,
-                        ease: "easeInOut",
-                        repeat: Infinity,
-                      }}
-                    >
-                      <ArrowRight className="h-6 w-6" />
-                    </motion.div>
-                  </span>
-                </button>
+                <ButtonNew
+                  variant="default"
+                  size="lg"
+                  className="!bg-gradient-to-r !from-blue-600 !to-indigo-600 !text-white glow-primary !shadow-xl hover:!shadow-2xl !px-8 !py-6 !text-lg group"
+                >
+                  <span>Explore Blog</span>
+                  <motion.div
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{
+                      duration: 1.5,
+                      ease: "easeInOut",
+                      repeat: Infinity,
+                    }}
+                  >
+                    <ArrowRight className="h-5 w-5" />
+                  </motion.div>
+                </ButtonNew>
               </MagneticButton>
 
               <MagneticButton href="/dashboard">
-                <button className="group px-12 py-6 text-xl font-bold rounded-2xl border-2 border-white/20 hover:border-white/40 transition-all duration-300 backdrop-blur-xl bg-white/5 hover:bg-white/10 text-white">
-                  <span className="flex items-center gap-3">
-                    <PenSquare className="h-6 w-6" />
-                    <span>Dashboard</span>
-                  </span>
-                </button>
+                <ButtonNew
+                  variant="ghost"
+                  size="lg"
+                  className="frosted !px-8 !py-6 !text-lg hover:!bg-white/80 dark:hover:!bg-slate-900/80 group"
+                >
+                  <PenSquare className="h-5 w-5" />
+                  <span className="font-semibold">Dashboard</span>
+                </ButtonNew>
               </MagneticButton>
             </motion.div>
 
-            {/* Social proof - ENHANCED */}
+            {/* Social proof */}
             <motion.div
-              className="mt-20 flex flex-wrap justify-center items-center gap-8 text-base"
+              className="mt-16 flex flex-wrap justify-center items-center gap-6 text-sm text-slate-600 dark:text-slate-400"
               variants={fadeInUp}
             >
               {[
-                {
-                  icon: Check,
-                  text: "100% TypeScript",
-                  gradient: "from-green-400 to-emerald-500",
-                },
-                {
-                  icon: Zap,
-                  text: "Lightning Fast",
-                  gradient: "from-yellow-400 to-orange-500",
-                },
-                {
-                  icon: Shield,
-                  text: "Production Ready",
-                  gradient: "from-blue-400 to-indigo-500",
-                },
+                { icon: Check, text: "100% TypeScript" },
+                { icon: Zap, text: "Lightning Fast" },
+                { icon: Shield, text: "Production Ready" },
               ].map((item, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 backdrop-blur-sm border border-white/10"
-                >
-                  <div
-                    className={`h-8 w-8 rounded-full bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg`}
-                  >
-                    <item.icon className="h-4 w-4 text-white" />
+                <div key={i} className="flex items-center gap-2">
+                  <div className="h-5 w-5 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center glow-success">
+                    <item.icon className="h-3 w-3 text-white" />
                   </div>
-                  <span className="font-semibold text-white">{item.text}</span>
+                  <span className="font-medium">{item.text}</span>
                 </div>
               ))}
             </motion.div>

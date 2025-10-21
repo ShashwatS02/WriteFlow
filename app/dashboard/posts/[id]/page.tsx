@@ -27,11 +27,14 @@ export default function EditPostPage({
   params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
-  const [postId, setPostId] = useState<number | undefined>(undefined);
+  const [postId, setPostId] = React.useState<number | undefined>(undefined);
 
-  useEffect(() => {
-    params.then((p) => setPostId(parseInt(p.id, 10)));
+  React.useEffect(() => {
+    params.then((p) => {
+      setPostId(parseInt(p.id, 10));
+    });
   }, [params]);
+
   const { data: post, isLoading } = usePostById(postId);
   const update = useUpdatePost();
   const categories = useCategories();

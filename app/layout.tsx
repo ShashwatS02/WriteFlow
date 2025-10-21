@@ -93,11 +93,23 @@ export const viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100">
+    <html lang="en" suppressHydrationWarning className="scroll-smooth">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100 font-inter antialiased">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ClientProviders>
-            <div className="fixed right-4 bottom-4 z-50">
+            <div className="fixed right-6 bottom-6 z-50">
               <ThemeToggle />
             </div>
             {children}

@@ -1,0 +1,479 @@
+/* Minimal global styles for development: Tailwind directives removed so
+   PostCSS does not require the Tailwind PostCSS plugin. Replace with
+   Tailwind once the PostCSS config and plugin are installed. */
+
+/* Re-enable Tailwind base/components/utilities. If PostCSS complains about
+   the plugin, ensure `@tailwindcss/postcss` & `tailwindcss` are installed
+   with compatible versions. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Ultra-Premium Design System - Vercel/Notion Inspired */
+@layer base {
+  :root {
+    /* Premium Color Palette */
+    --color-primary-50: 239 246 255;
+    --color-primary-500: 59 130 246;
+    --color-primary-600: 37 99 235;
+    --color-primary-700: 29 78 216;
+
+    --color-accent-500: 139 92 246;
+    --color-accent-600: 124 58 237;
+
+    /* Vercel-style Gradient Mesh */
+    --gradient-mesh: conic-gradient(
+      from 180deg at 50% 50%,
+      rgba(99, 102, 241, 0.2) 0deg,
+      rgba(168, 85, 247, 0.15) 120deg,
+      rgba(59, 130, 246, 0.1) 240deg,
+      rgba(99, 102, 241, 0.2) 360deg
+    );
+
+    /* Premium Gradients */
+    --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    --gradient-info: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --gradient-purple-pink: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+    --gradient-blue-teal: linear-gradient(135deg, #3b82f6 0%, #14b8a6 100%);
+    --gradient-shimmer: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 100%
+    );
+
+    /* Enhanced Glass Effects */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-bg-dark: rgba(15, 23, 42, 0.7);
+    --glass-border-dark: rgba(255, 255, 255, 0.1);
+
+    /* Premium Shadows with Color Tints */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md:
+      0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg:
+      0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl:
+      0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+
+    /* Colored Shadows (Vercel-style) */
+    --shadow-primary:
+      0 8px 24px -6px rgba(59, 130, 246, 0.4),
+      0 4px 12px -4px rgba(59, 130, 246, 0.2);
+    --shadow-success:
+      0 8px 24px -6px rgba(16, 185, 129, 0.4),
+      0 4px 12px -4px rgba(16, 185, 129, 0.2);
+    --shadow-purple:
+      0 8px 24px -6px rgba(139, 92, 246, 0.4),
+      0 4px 12px -4px rgba(139, 92, 246, 0.2);
+    --shadow-pink:
+      0 8px 24px -6px rgba(236, 72, 153, 0.4),
+      0 4px 12px -4px rgba(236, 72, 153, 0.2);
+    --shadow-glow:
+      0 0 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+    --shadow-elevated:
+      0 20px 40px -12px rgba(0, 0, 0, 0.2), 0 8px 16px -8px rgba(0, 0, 0, 0.1);
+  }
+
+  html {
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1,
+      "ss01" 1,
+      "ss02" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-variant-ligatures: common-ligatures;
+  }
+
+  body {
+    @apply bg-white dark:bg-slate-950;
+    @apply text-slate-900 dark:text-slate-50;
+    font-synthesis: none;
+  }
+
+  /* Enhanced scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-slate-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-700 rounded-full;
+    @apply hover:bg-slate-400 dark:hover:bg-slate-600;
+    transition: background-color 0.2s;
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) rgb(241 245 249);
+  }
+
+  .dark * {
+    scrollbar-color: rgb(51 65 85) rgb(15 23 42);
+  }
+}
+
+/* Ultra-Premium Utility Classes */
+@layer utilities {
+  /* Glass Morphism Effects */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid var(--glass-border);
+  }
+
+  .dark .glass {
+    background: var(--glass-bg-dark);
+    border-color: var(--glass-border-dark);
+  }
+
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .dark .glass-strong {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Gradient Mesh Background (Vercel-style) */
+  .gradient-mesh {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .gradient-mesh::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-mesh);
+    opacity: 0.6;
+    animation: mesh-rotate 20s linear infinite;
+    z-index: -1;
+  }
+
+  @keyframes mesh-rotate {
+    0% {
+      transform: rotate(0deg) scale(1);
+    }
+    50% {
+      transform: rotate(180deg) scale(1.1);
+    }
+    100% {
+      transform: rotate(360deg) scale(1);
+    }
+  }
+
+  /* Gradient Text Effects */
+  .gradient-text {
+    background: linear-gradient(
+      135deg,
+      rgb(99, 102, 241),
+      rgb(168, 85, 247),
+      rgb(236, 72, 153)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+  }
+
+  .gradient-text-animated {
+    background: linear-gradient(
+      135deg,
+      rgb(99, 102, 241),
+      rgb(168, 85, 247),
+      rgb(236, 72, 153),
+      rgb(59, 130, 246)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+  }
+
+  @keyframes gradient-shift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  /* Premium Shimmer Effect */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--gradient-shimmer);
+    transform: translateX(-100%);
+    animation: shimmer 2.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Glow Effects */
+  .glow-primary {
+    box-shadow: var(--shadow-primary);
+  }
+
+  .glow-success {
+    box-shadow: var(--shadow-success);
+  }
+
+  .glow-purple {
+    box-shadow: var(--shadow-purple);
+  }
+
+  .glow-pink {
+    box-shadow: var(--shadow-pink);
+  }
+
+  /* Elevated Card Effect (Notion-style) */
+  .elevated {
+    box-shadow: var(--shadow-elevated);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .elevated:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 24px 48px -12px rgba(0, 0, 0, 0.25),
+      0 12px 24px -8px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Floating Animation */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Pulse Glow Animation */
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      opacity: 1;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+    }
+    50% {
+      opacity: 0.8;
+      box-shadow: 0 0 40px rgba(99, 102, 241, 0.8);
+    }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Border Gradient Effects */
+  .border-gradient {
+    position: relative;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .border-gradient::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    z-index: -1;
+  }
+
+  /* Frosted Glass Effect (macOS-style) */
+  .frosted {
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(110%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .dark .frosted {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(40px) saturate(180%) brightness(90%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(90%);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
+  /* Spotlight Effect (Vercel-style) */
+  .spotlight {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .spotlight::before {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    background: radial-gradient(
+      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(99, 102, 241, 0.15) 0%,
+      transparent 50%
+    );
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+
+  .spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* Premium Grid Pattern Background */
+  .grid-pattern {
+    background-image:
+      linear-gradient(rgba(99, 102, 241, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 102, 241, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .dark .grid-pattern {
+    background-image:
+      linear-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99, 102, 241, 0.1) 1px, transparent 1px);
+  }
+
+  /* Dot Pattern Background */
+  .dot-pattern {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(99, 102, 241, 0.15) 1px,
+      transparent 0
+    );
+    background-size: 20px 20px;
+  }
+
+  .dark .dot-pattern {
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(99, 102, 241, 0.25) 1px,
+      transparent 0
+    );
+  }
+
+  /* Interactive Hover Scale */
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-2px) scale(1.01);
+  }
+
+  /* Magnetic Button Effect */
+  @keyframes magnetic-pull {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(var(--magnetic-x, 0), var(--magnetic-y, 0));
+    }
+  }
+
+  .magnetic {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+/* Premium Component Styles */
+@layer components {
+  /* Enhanced Focus Rings */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+    @apply dark:focus:ring-blue-400 dark:focus:ring-offset-slate-900;
+  }
+
+  /* Premium Input Styles */
+  .input-premium {
+    @apply glass rounded-xl px-4 py-3 text-sm;
+    @apply border border-slate-200/50 dark:border-slate-700/50;
+    @apply focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20;
+    @apply transition-all duration-200;
+    @apply placeholder:text-slate-400 dark:placeholder:text-slate-500;
+  }
+
+  /* Premium Button Base */
+  .button-premium {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-6 py-3 rounded-xl font-medium text-sm;
+    @apply transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply active:scale-[0.98];
+  }
+
+  /* Card Styles */
+  .card-premium {
+    @apply glass rounded-2xl p-6;
+    @apply border border-slate-200/50 dark:border-slate-800/50;
+    @apply hover-lift;
+  }
+}
+
+/* Performance Optimizations */
+@layer base {
+  /* Reduce motion for accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* GPU acceleration for smooth animations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+  }
+}
